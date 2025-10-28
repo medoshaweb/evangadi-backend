@@ -3,8 +3,6 @@ import express from "express";
 import cors from "cors";
 const router = express.Router();
 import authRoutes from "./routes/auth.js";
-
-// Correct ESM import for answersRouter
 import answersRoutes from "./routes/answerRoutes.js";
 import questionRoutes from "./routes/questionRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
@@ -14,7 +12,18 @@ import userRoutes from "./routes/userRoutes.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(
+  cors({
+    origin: [
+      "https://me-dosha.com/forum/evangadi-forum", // your live domain
+      "https://www.me-dosha.com/forum/evangadi-forum", // your live domain
+      "http://localhost:5173", // for local development
+    ],
+    credentials: true,
+  })
+);
+app.options("*", cors());
+
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 
