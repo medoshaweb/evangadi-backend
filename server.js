@@ -15,14 +15,14 @@ const PORT = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "https://me-dosha.com", // your live domain
-      "https://www.me-dosha.com", // your live domain
+      // "https://me-dosha.com", // your live domain
+      // "https://www.me-dosha.com", // your live domain
       "http://localhost:5173", // for local development
     ],
     credentials: true,
   })
 );
-app.options("*", cors());
+// app.options("*", cors());
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
