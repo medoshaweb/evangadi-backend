@@ -1,48 +1,4 @@
-// import mysql from "mysql2/promise";
-// import dotenv from "dotenv";
-// dotenv.config();
 
-// const shouldUseSSL =
-//   typeof process.env.DB_SSL === "string"
-//     ? process.env.DB_SSL.toLowerCase() === "true"
-//     : false;
-// const sslOptions = shouldUseSSL
-//   ? { minVersion: "TLSv1.2", rejectUnauthorized: false }
-//   : undefined;
-
-//   const dbConfig = {
-//   host: process.env.DB_HOST,
-//   user: process.env.DB_USER,
-//   password: process.env.DB_PASSWORD,
-//   database: process.env.DB_NAME,
-//   port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
-//   ssl: sslOptions,
-//   waitForConnections: true,
-//   connectionLimit: 10,
-//   connectTimeout: 15000,
-//   queueLimit: 0,
-// };
-
-// const db = mysql.createPool(dbConfig);
-
-// try {
-//   // Basic diagnostics to help troubleshoot connectivity
-//   console.log(
-//     "🔎 DB config:",
-//     {
-//       host: dbConfig.host,
-//       port: dbConfig.port,
-//       database: dbConfig.database,
-//       ssl: Boolean(dbConfig.ssl),
-//     }
-//   );
-//   // Lightweight query to validate that we are actually connected to a MySQL server
-//   await db.query("SELECT 1");
-//   console.log("✅ MySQL pool initialized");
-// } catch (err) {
-//   console.error("❌ MySQL connection test failed:", err.message);
-// }
-// export default db;
 
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
@@ -50,11 +6,22 @@ import fs from "fs";
 import path from "path";
 dotenv.config();
 
+function normalizeBoolean(value) {
+  if (typeof value !== "string") return undefined;
+  const v = value.trim().toLowerCase();
+  return ["true", "1", "yes", "on"].includes(v);
+}
+
 function buildSslOptions() {
-  const sslEnabled =
-    typeof process.env.DB_SSL === "string"
-      ? process.env.DB_SSL.toLowerCase() === "true"
-      : false;
+  const rawDbSsl = process.env.DB_SSL;
+  let sslEnabled = normalizeBoolean(rawDbSsl);
+
+  // Heuristic: if connecting to Aiven and DB_SSL is not set, default to SSL on
+  if (sslEnabled === undefined && typeof process.env.DB_HOST === "string") {
+    if (process.env.DB_HOST.includes("aivencloud.com")) {
+      sslEnabled = true;
+    }
+  }
 
   if (!sslEnabled) return undefined;
 
@@ -103,6 +70,7 @@ try {
     ssl: Boolean(dbConfig.ssl),
     sslMode,
     passwordProvided: Boolean(dbPassword),
+    rawDbSsl,
   });
   await pool.query("SELECT 1");
   console.log("✅ MySQL pool initialized");
