@@ -20,9 +20,9 @@ app.use("/", installRoutes);
 app.use(
   cors({
     origin: [
-      process.env.FRONTEND_URL ||
+      process.env.FRONTEND_URL || "https://evangadi-frontend-sand.vercel.app"
 
-      "http://localhost:5173", // for local development
+      // "http://localhost:5173", // for local development
     ],
     credentials: true,
   })
