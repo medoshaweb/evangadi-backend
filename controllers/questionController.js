@@ -88,10 +88,10 @@ WHERE q.title LIKE ? OR q.description LIKE ? OR u.username LIKE ?
       Number(offset),
     ]);
 
-    // Format created_at before sending to frontend
+    // Send ISO timestamps; let frontend handle relative formatting
     const formattedRows = rows.map((r) => ({
       ...r,
-      created_at: formatDateTime(r.created_at),
+      created_at: new Date(r.created_at).toISOString(),
     }));
 
     res.json({
@@ -229,7 +229,7 @@ export const createQuestion = async (req, res) => {
     );
 
     const newQuestion = rows[0];
-    newQuestion.created_at = formatDateTime(newQuestion.created_at);
+    newQuestion.created_at = new Date(newQuestion.created_at).toISOString();
 
     res.json(newQuestion);
   } catch (err) {
