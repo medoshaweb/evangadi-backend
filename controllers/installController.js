@@ -40,9 +40,9 @@ export const install = async (req, res) => {
 );
     `);
 
-    // 👥 5. Groups table
+   // 👥 5. Groups table
     await db.query(`
-      CREATE TABLE question_embeddings (
+     CREATE TABLE IF NOT EXISTS question_embeddings (
   id INT AUTO_INCREMENT PRIMARY KEY,
   question_id INT NOT NULL,
   embedding JSON NOT NULL,
@@ -52,7 +52,7 @@ export const install = async (req, res) => {
 
     // 👥 6. User-Groups table
     await db.query(`
-     CREATE TABLE question_votes (
+        CREATE TABLE IF NOT EXISTS question_votes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   question_id INT NOT NULL,
   user_id INT NOT NULL,
@@ -66,7 +66,7 @@ export const install = async (req, res) => {
 
     // 🌱 7. Insert sample groups
     await db.query(`
-      CREATE TABLE answer_votes (
+     CREATE TABLE IF NOT EXISTS answer_votes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   answer_id INT NOT NULL,
   user_id INT NOT NULL,
