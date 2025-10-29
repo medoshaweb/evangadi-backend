@@ -91,11 +91,17 @@ const dbConfig = {
 const pool = mysql.createPool(dbConfig);
 
 try {
+  let sslMode = "disabled";
+  if (dbConfig.ssl) {
+    // mysql2 accepts boolean or object; we set object
+    sslMode = dbConfig.ssl.ca ? "tls-verified" : "tls-insecure";
+  }
   console.log("🔎 DB config:", {
     host: dbConfig.host,
     port: dbConfig.port,
     database: dbConfig.database,
     ssl: Boolean(dbConfig.ssl),
+    sslMode,
     passwordProvided: Boolean(dbPassword),
   });
   await pool.query("SELECT 1");
