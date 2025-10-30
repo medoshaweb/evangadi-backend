@@ -39,14 +39,16 @@ async function startServer() {
   try {
     await db.query("SELECT 1"); // Test DB connection
     console.log("✅ MySQL promise-based pool created");
-    // Bind to all interfaces for Render deployment
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
   } catch (err) {
-    console.error("❌ Database connection failed:", err.message);
-    process.exit(1);
+    console.error("⚠️  Database connection failed:", err.message);
+    console.log("⚠️  Server will start without database. Some features may not work.");
+    // Don't exit - allow server to start for testing (e.g., AI endpoints that don't need DB)
   }
+  
+  // Start server regardless of DB connection status
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
 }
 
 startServer();

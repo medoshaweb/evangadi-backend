@@ -8,17 +8,33 @@ function normalizeBoolean(value) {
   return ["true", "1", "yes", "on"].includes(v);
 }
 
-const sslEnabled = normalizeBoolean(process.env.DB_SSL) ?? (process.env.DB_HOST?.includes("aivencloud.com") ? true : false);
+// Helper to clean env values (remove JavaScript-like syntax)
+function cleanEnvValue(value, defaultValue = null) {
+  if (!value) return defaultValue;
+  // Remove JavaScript syntax like "value || fallback"
+  const cleaned = value.split("||")[0].trim();
+  return cleaned || defaultValue;
+}
+
+// Get database config with proper fallbacks
+const dbHost = cleanEnvValue(process.env.DB_HOST, "localhost");
+const dbUser = cleanEnvValue(process.env.DB_USER, "root");
+const dbName = cleanEnvValue(process.env.DB_NAME, "evan_for");
+const dbPort = process.env.DB_PORT 
+  ? Number(cleanEnvValue(process.env.DB_PORT, "3306")) 
+  : 3306;
+
+const sslEnabled = normalizeBoolean(process.env.DB_SSL) ?? (dbHost.includes("aivencloud.com") ? true : false);
 const sslOptions = sslEnabled ? { rejectUnauthorized: false } : undefined;
 
-const dbPassword = process.env.DB_PASSWORD ?? process.env.DB_PASS;
+const dbPassword = cleanEnvValue(process.env.DB_PASSWORD) ?? cleanEnvValue(process.env.DB_PASS);
 
 const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
+  host: dbHost,
+  user: dbUser,
   password: dbPassword,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+  database: dbName,
+  port: dbPort,
   ssl: sslOptions,
   waitForConnections: true,
   connectionLimit: 10,
@@ -27,9 +43,10 @@ const db = mysql.createPool({
 });
 
 console.log("🔎 DB config:", {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
-  database: process.env.DB_NAME,
+  host: dbHost,
+  port: dbPort,
+  database: dbName,
+  user: dbUser,
   ssl: Boolean(sslOptions),
   passwordProvided: Boolean(dbPassword),
 });

@@ -12,7 +12,10 @@ router.post("/ask", async (req, res) => {
     const answer = await generateAnswer(prompt);
     res.json({ answer });
   } catch (err) {
-    res.status(500).json({ error: "AI generation failed" });
+    console.error("AI generation failed:", err.message || err);
+    res
+      .status(500)
+      .json({ error: err.message || "AI generation failed" });
   }
 });
 
