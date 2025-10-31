@@ -71,16 +71,19 @@ WHERE q.title LIKE ? OR q.description LIKE ? OR u.username LIKE ?
     // Fetch paginated questions
     const query = `
       SELECT 
-        q.*, 
+        q.id,
+        q.user_id,
+        q.title,
+        q.description,
+        q.created_at,
         u.username,
         COALESCE(SUM(v.vote), 0) AS totalVotes,
-        COALESCE(COUNT(a.id), 0) AS answersCount
+        (SELECT COUNT(*) FROM answers a WHERE a.question_id = q.id) AS answersCount
       FROM questions q
       JOIN users u ON q.user_id = u.id
       LEFT JOIN question_votes v ON q.id = v.question_id
-      LEFT JOIN answers a ON q.id = a.question_id
       WHERE q.title LIKE ? OR q.description LIKE ? OR u.username LIKE ?
-      GROUP BY q.id
+      GROUP BY q.id, q.user_id, q.title, q.description, q.created_at, u.username
       ORDER BY q.created_at DESC
       LIMIT ? OFFSET ?
 `;
