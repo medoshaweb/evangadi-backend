@@ -74,8 +74,14 @@ export const voteAnswer = async (req, res) => {
     console.log("voteAnswer body:", req.body);
     console.log("User from token:", req.user);
 
-    if (!answerId || ![1, -1].includes(vote)) {
-      return res.status(400).json({ message: "Invalid vote data" });
+    // Convert to numbers to handle string inputs
+    const voteNum = Number(vote);
+    const answerIdNum = Number(answerId);
+
+    if (!answerIdNum || ![-1, 1].includes(voteNum)) {
+      return res.status(400).json({ 
+        message: "Invalid vote data. Vote must be 1 or -1, answerId is required." 
+      });
     }
 
     // ✅ Insert or update vote
@@ -83,7 +89,7 @@ export const voteAnswer = async (req, res) => {
       `INSERT INTO answer_votes (user_id, answer_id, vote)
        VALUES (?, ?, ?)
        ON DUPLICATE KEY UPDATE vote = ?`,
-      [userId, answerId, vote, vote]
+      [userId, answerIdNum, voteNum, voteNum]
     );
 
     // ✅ Calculate total votes
@@ -91,7 +97,7 @@ export const voteAnswer = async (req, res) => {
       `SELECT COALESCE(SUM(vote), 0) AS totalVotes
        FROM answer_votes
        WHERE answer_id = ?`,
-      [answerId]
+      [answerIdNum]
     );
 
     console.log("Updated totalVotes:", result[0].totalVotes);
